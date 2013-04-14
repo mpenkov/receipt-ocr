@@ -42,34 +42,34 @@ def unrotate(original, debug=False):
         cv2.waitKey()
 
     #
-    # Pick the rectangle with the largest area
+    # Pick the quad with the largest area
     #
-    rects = []
+    quads = []
     for contour in contours:
         #
         # TODO: check if the contour is rectangular enough
         #
-        rect = cv2.minAreaRect(contour)
         area = cv2.contourArea(contour)
-        rects.append((area, rect))
 
-    rect = sorted(rects, reverse=True)[0][1]
-    (c_x, c_y), (width, height), theta_deg = rect
+        #
+        # TODO: How to decide this threshold?
+        # TODO: order the vertices in the decided polygon in some predictable way
+        #
+        poly = cv2.approxPolyDP(contour, 50, True)
+        assert len(poly) == 4
+        quads.append((area, poly))
 
-    alpha = math.atan2(height, width)
-    theta = theta_deg*math.pi/180
-    diag = math.sqrt(width**2 + height**2)
-    a_x = c_x - diag/2 * math.cos(alpha-theta)
-    a_y = c_y + diag/2 * math.sin(alpha-theta)
-
-    b_x = c_x - diag/2 * math.cos(alpha+theta)
-    b_y = c_y - diag/2 * math.sin(alpha+theta)
-
-    d_x = c_x + diag/2 * math.cos(alpha-theta)
-    d_y = c_y - diag/2 * math.sin(alpha-theta)
-
-    e_x = c_x + diag/2 * math.cos(alpha+theta)
-    e_y = c_y + diag/2 * math.sin(alpha+theta)
+    quad = sorted(quads, reverse=True)[0][1]
+    a_x = quad[0][0][0]
+    a_y = quad[0][0][1]
+    b_x = quad[1][0][0]
+    b_y = quad[1][0][1]
+    d_x = quad[2][0][0]
+    d_y = quad[2][0][1]
+    e_x = quad[3][0][0]
+    e_y = quad[3][0][1]
+    width = math.sqrt((a_x-b_x)**2 + (a_y-b_y)**2)
+    height = math.sqrt((b_x-d_x)**2 + (b_y-d_y)**2)
 
     if debug:
         cv2.circle(im, (int(a_x), int(a_y)), 5, (255, 0, 0), -1)   # blue
@@ -83,7 +83,7 @@ def unrotate(original, debug=False):
     Width, Height = width/scale, height/scale
 
     src = np.array([(A_x, A_y), (B_x, B_y), (D_x, D_y), (E_x, E_y)], dtype="float32")
-    dst = np.array([(0, Height), (0, 0), (Width, 0), (Width, Height)], dtype="float32")
+    dst = np.array([(Width, 0), (0, 0), (0, Height), (Width, Height)], dtype="float32")
 
     perspective = cv2.getPerspectiveTransform(src, dst)
 
