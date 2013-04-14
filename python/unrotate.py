@@ -73,12 +73,19 @@ def unrotate(original, debug=False):
 
     if debug:
         cv2.circle(im, (int(a_x), int(a_y)), 5, (255, 0, 0), -1)   # blue
+        cv2.putText(im, "A", (int(a_x), int(a_y)), cv.CV_FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0))
         cv2.circle(im, (int(b_x), int(b_y)), 5, (0, 255, 0), -1)   # green
+        cv2.putText(im, "B", (int(b_x), int(b_y)), cv.CV_FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0))
         cv2.circle(im, (int(d_x), int(d_y)), 5, (0, 0, 255), -1)   # red
+        cv2.putText(im, "D", (int(d_x), int(d_y)), cv.CV_FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255))
         cv2.circle(im, (int(e_x), int(e_y)), 5, (255, 255, 0), -1) # cyan
+        cv2.putText(im, "E", (int(e_x), int(e_y)), cv.CV_FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0))
         cv2.imshow(__file__, im)
         cv2.waitKey()
 
+    #
+    # Scale up to the original image and calculate a perspective transform
+    #
     A_x, A_y, B_x, B_y, D_x, D_y, E_x, E_y = map(lambda x: x/scale, [a_x, a_y, b_x, b_y, d_x, d_y, e_x, e_y])
     Width, Height = width/scale, height/scale
 
