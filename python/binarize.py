@@ -15,12 +15,11 @@ def binarize(im, debug=False):
         cv2.waitKey()
 
     #
-    # TODO: how to determine the size of the box filter?
+    # TODO: how to reliably determine these parameters?
     #
-    blurred = cv2.blur(y, (48, 48))
-    diff = cv2.absdiff(y, blurred)
-
-    _, thresh = cv2.threshold(diff, 0, 255, cv.CV_THRESH_OTSU)
+    bsize = 9
+    C = 8
+    thresh = cv2.adaptiveThreshold(y, 255, cv.CV_ADAPTIVE_THRESH_MEAN_C, cv.CV_THRESH_BINARY_INV, bsize, C)
     return thresh
 
 def main():
