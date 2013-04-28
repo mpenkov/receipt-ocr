@@ -8,16 +8,16 @@ import numpy as np
 import math
 import copy
 
-MIN_WIDTH = 5
-MIN_ASPECT_RATIO = 1
-MAX_ASPECT_RATIO = 5
+MIN_HEIGHT = 32
+MIN_ASPECT_RATIO = 0.6
+MAX_ASPECT_RATIO = 6
 TOL = 4
 
 def is_good_roi(roi):
     """Checks the aspect ratio and minimum size of the ROI.
     Returns True if it's OK."""
     x,y,width,height = roi
-    return width >= MIN_WIDTH and MIN_ASPECT_RATIO <= height/width <= MAX_ASPECT_RATIO
+    return height >= MIN_HEIGHT and MIN_ASPECT_RATIO <= height/width <= MAX_ASPECT_RATIO
 
 def is_overlap(r1, r2):
     """Returns True if the two ROIs overlap."""
