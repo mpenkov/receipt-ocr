@@ -6,29 +6,32 @@ import cv2
 import numpy as np
 import math
 
+def white_paper_mask(im, debug=False):
+    """Locate white regions of the original image."""
+    hsv = cv2.cvtColor(im, cv.CV_BGR2HSV)
+    _, s, v = cv2.split(hsv)
+    _, s = cv2.threshold(s, 64, 255, cv.CV_THRESH_BINARY_INV)
+    _, v = cv2.threshold(v, 96, 255, cv.CV_THRESH_BINARY)
+    mask = cv2.bitwise_and(s, v)
+
+    if debug:
+        cv2.imshow(__file__, s)
+        cv2.waitKey()
+        cv2.imshow(__file__, v)
+        cv2.waitKey()
+        cv2.imshow(__file__, mask)
+        cv2.waitKey()
+    return mask
+
 def unrotate(original, debug=False):
+    mask = white_paper_mask(original, debug)
     #
     # scale down so that we can use consistent number of iterations for morphological ops
     #
     scale = 512/original.shape[1]
-    im = cv2.resize(original, (0,0), fx=scale, fy=scale) 
+    thresh = cv2.resize(mask, (0,0), fx=scale, fy=scale)
 
-    ycrcb = cv2.cvtColor(im, cv.CV_BGR2YCrCb)
-    y, cr, cb = cv2.split(ycrcb)
-
-    if debug:
-        cv2.imshow(__file__, y)
-        cv2.waitKey()
-
-    #
-    # TODO: adaptive threshold?  Ohtsu?
-    #
-    _, thresh = cv2.threshold(y, 92, 255, cv.CV_THRESH_BINARY)
-    if debug:
-        cv2.imshow(__file__, thresh)
-        cv2.waitKey()
-
-    num_iter = 3
+    num_iter = 1
     closed = cv2.dilate(cv2.erode(thresh, None, iterations=num_iter), None, iterations=num_iter)
     if debug:
         cv2.imshow(__file__, closed)
