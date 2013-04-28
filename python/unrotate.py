@@ -107,7 +107,8 @@ def unrotate(original, debug=False):
 def main():
     import sys
     original = cv2.imread(sys.argv[1])
-    unrotated = unrotate(original)
+    assert original is not None
+    unrotated = unrotate(original, debug=False)
 
     cv2.imshow(__file__, unrotated)
     cv2.waitKey()
