@@ -70,7 +70,26 @@ def merge_overlaps(rois):
 
     return merged, num_merged
 
-def get_rois(binarized):
+def roi_compare(roi1, roi2):
+    x1, y1, _, _ = roi1
+    x2, y2, _, _ = roi2
+    x1 //= 8
+    x2 //= 8
+    y1 //= 8
+    y2 //= 8
+    if y1 < y2:
+        return -1
+    elif y1 > y2:
+        return 1
+
+    if x1 < x2:
+        return -1
+    elif x1 > x2:
+        return 1
+
+    return 0
+
+def get_rois(binarized, numiter=1):
     #
     # findContours uses the input image as scratch space
     #
@@ -83,6 +102,7 @@ def get_rois(binarized):
         if num_merged == 0:
             break
     rois = filter(is_good_roi, rois)
+    rois.sort(cmp=roi_compare)
     return rois
 
 def main():
