@@ -94,7 +94,10 @@ def get_rois(binarized, numiter=1):
     # findContours uses the input image as scratch space
     #
     tmp = copy.deepcopy(binarized)
-    #tmp = cv2.dilate(tmp, None)
+    #
+    # Open the image to get rid of "holes" in the border
+    #
+    tmp = cv2.erode(cv2.dilate(tmp, None, iterations=numiter), None, iterations=numiter)
     contours, _= cv2.findContours(tmp, cv.CV_RETR_EXTERNAL, cv.CV_CHAIN_APPROX_SIMPLE)
     rois = map(lambda x: cv2.boundingRect(x), contours)
     while True:
