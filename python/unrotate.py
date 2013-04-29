@@ -30,6 +30,7 @@ def unrotate(original, debug=False):
     #
     scale = 512/original.shape[1]
     thresh = cv2.resize(mask, (0,0), fx=scale, fy=scale)
+    scaled = cv2.resize(original, (0,0), fx=scale, fy=scale)
 
     num_iter = 1
     closed = cv2.dilate(cv2.erode(thresh, None, iterations=num_iter), None, iterations=num_iter)
@@ -40,8 +41,8 @@ def unrotate(original, debug=False):
     contours, _= cv2.findContours(closed, cv.CV_RETR_EXTERNAL, cv.CV_CHAIN_APPROX_SIMPLE)
 
     if debug:
-        cv2.drawContours(im, contours, -1, (255, 0, 0))
-        cv2.imshow(__file__, im)
+        cv2.drawContours(scaled, contours, -1, (255, 0, 0))
+        cv2.imshow(__file__, scaled)
         cv2.waitKey()
 
     #
@@ -59,9 +60,14 @@ def unrotate(original, debug=False):
         # TODO: order the vertices in the decided polygon in some predictable way
         #
         poly = cv2.approxPolyDP(contour, 50, True)
-        assert len(poly) == 4
-        quads.append((area, poly))
+        if len(poly) == 4:
+            quads.append((area, poly))
 
+    assert quads
+
+    #
+    # Pick the largest quad, by area
+    #
     quad = sorted(quads, reverse=True)[0][1]
     a_x = quad[0][0][0]
     a_y = quad[0][0][1]
@@ -75,15 +81,15 @@ def unrotate(original, debug=False):
     height = math.sqrt((b_x-d_x)**2 + (b_y-d_y)**2)
 
     if debug:
-        cv2.circle(im, (int(a_x), int(a_y)), 5, (255, 0, 0), -1)   # blue
-        cv2.putText(im, "A", (int(a_x), int(a_y)), cv.CV_FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0))
-        cv2.circle(im, (int(b_x), int(b_y)), 5, (0, 255, 0), -1)   # green
-        cv2.putText(im, "B", (int(b_x), int(b_y)), cv.CV_FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0))
-        cv2.circle(im, (int(d_x), int(d_y)), 5, (0, 0, 255), -1)   # red
-        cv2.putText(im, "D", (int(d_x), int(d_y)), cv.CV_FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255))
-        cv2.circle(im, (int(e_x), int(e_y)), 5, (255, 255, 0), -1) # cyan
-        cv2.putText(im, "E", (int(e_x), int(e_y)), cv.CV_FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0))
-        cv2.imshow(__file__, im)
+        cv2.circle(scaled, (int(a_x), int(a_y)), 5, (255, 0, 0), -1)   # blue
+        cv2.putText(scaled, "A", (int(a_x), int(a_y)), cv.CV_FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0))
+        cv2.circle(scaled, (int(b_x), int(b_y)), 5, (0, 255, 0), -1)   # green
+        cv2.putText(scaled, "B", (int(b_x), int(b_y)), cv.CV_FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0))
+        cv2.circle(scaled, (int(d_x), int(d_y)), 5, (0, 0, 255), -1)   # red
+        cv2.putText(scaled, "D", (int(d_x), int(d_y)), cv.CV_FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255))
+        cv2.circle(scaled, (int(e_x), int(e_y)), 5, (255, 255, 0), -1) # cyan
+        cv2.putText(scaled, "E", (int(e_x), int(e_y)), cv.CV_FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0))
+        cv2.imshow(__file__, scaled)
         cv2.waitKey()
 
     #
@@ -112,7 +118,7 @@ def main():
 
     cv2.imshow(__file__, unrotated)
     cv2.waitKey()
+    cv2.imwrite("unrotated.png", unrotated)
 
-    
 if __name__ == "__main__":
     main()
